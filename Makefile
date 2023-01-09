@@ -64,6 +64,16 @@ docker-prune:
 clean-docker:
 	@rm -f .docker/.env
 
+clean-env-nestjs-boilerplate: PROJECT := nestjs-boilerplate
+clean-env-nebular-boilerplate: PROJECT := nebular-boilerplate
+
+clean-env-nestjs-boilerplate clean-env-nebular-boilerplate:
+	@rm -rf $(PROJECT)/.env
+		$(PROJECT)/node_modules
+		$(PROJECT)/.pnmp-store
+		$(PROJECT)/dist/*
+		$(PROJECT)/error.log
+
 clean-env-all: clean-docker
 
 destroy: docker-prune clean-env-all
@@ -71,12 +81,17 @@ destroy: docker-prune clean-env-all
 set-hosts-file:
 	@if ! [ "$(shell id -u)" = 0 ];then echo "Error: Please run with sudo..."; exit 1; fi; \
 		sed -i "/boilerplate./d" /etc/hosts; \
-	    echo "127.0.0.1 api.boilerplate.localhost
+	    echo "127.0.0.1 api.boilerplate.localhost boilerplate.localhost
 
 install-docker:
 	@cp -f .docker/.env.sample .docker/.env
 
-install-env-all: install-docker
+install-env-nestjs-boilerplate: PROJECT := nestjs-boilerplate
+
+install-env-nestjs-boilerplate:
+	@cp -f $(PROJECT)/.env.sample $(PROJECT)/.env
+
+install-env-all: install-docker install-env-nestjs-boilerplate
 
 download-submodules:
 	@git submodule update --init
@@ -95,3 +110,20 @@ mariadb-rm-volume:
 	@docker volume rm blp-mariadb-volume
 
 mariadb-reload-database: mariadb-rm-volume up
+
+node-env-clear-nestjs-boilerplate: PROJECT := nestjs-boilerplate
+node-env-clear-nestjs-boilerplate: CONTAINER := blp-backend-node
+node-env-clear-nebular-boilerplate: PROJECT := nebular-boilerplate
+node-env-clear-nebular-boilerplate: CONTAINER := blp-frontend-node
+
+node-env-clear-nestjs-boilerplate node-env-clear-nebular-boilerplate:
+	@docker stop $(CONTAINER)
+	@docker rm -f $(CONTAINER)
+	@rm -rf $(PROJECT)/node_modules
+		$(PROJECT)/.pnmp-store
+		$(PROJECT)/dist/*
+		$(PROJECT)/error.log
+
+node-env-clear-all: node-env-clear-nestjs-boilerplate node-env-clear-nebular-boilerplate
+
+node-rebuild-packages: node-env-clear-all up

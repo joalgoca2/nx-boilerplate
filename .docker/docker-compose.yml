@@ -23,6 +23,42 @@ services:
     networks: 
       - blp-dev
 
+  blp-backend-node:
+    container_name: blp-backend-node
+    restart: unless-stopped
+    build:
+      context: ../
+      dockerfile: ./.docker/node/Dockerfile
+      args:
+        BACKEND_FRONTEND_DOCKER_IMAGE_TAG: ${BACKEND_FRONTEND_DOCKER_IMAGE_TAG:?err}
+    image: node-boilerplate:${BACKEND_FRONTEND_DOCKER_IMAGE_TAG:?err}
+    volumes:
+      - ../nestjs-boilerplate:/srv/nestjs-boilerplate
+    command: sh -c "cd /srv/nestjs-boilerplate && pnpm install && npm run start:dev"
+    tty: true 
+    depends_on:
+      - blp-mariadb
+    networks:
+      - blp-dev
+
+  blp-frontend-node:
+    container_name: blp-frontend-node
+    restart: unless-stopped
+    build:
+      context: ../
+      dockerfile: ./.docker/node/Dockerfile
+      args:
+        BACKEND_FRONTEND_DOCKER_IMAGE_TAG: ${BACKEND_FRONTEND_DOCKER_IMAGE_TAG:?err}
+    image: node-boilerplate:${BACKEND_FRONTEND_DOCKER_IMAGE_TAG:?err}
+    volumes:
+      - ../nebular-boilerplate:/srv/nebular-boilerplate
+    command: sh -c "cd /srv/nebular-boilerplate && pnpm install && npm start"
+    tty: true 
+    depends_on:
+      - blp-backend-node
+    networks:
+      - blp-dev
+
 volumes:
   blp-mariadb-volume:
     name: blp-mariadb-volume
