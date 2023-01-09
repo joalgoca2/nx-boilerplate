@@ -1,0 +1,33 @@
+services:
+  blp-mariadb:
+    container_name: blp-mariadb
+    restart: unless-stopped
+    build:
+      context: ../
+      dockerfile: ./.docker/db/Dockerfile
+      args:
+        DB_DOCKER_IMAGE_TAG: ${DB_DOCKER_IMAGE_TAG:?err}
+    image: mariadb-boilerplate:${DB_DOCKER_IMAGE_TAG:?err}
+    ports:
+      - "0.0.0.0:${DB_HOST_PORT:?err}:3306"
+    volumes:
+      - blp-mariadb-volume:/var/lib/mysql
+    environment:
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASS:?err}
+      MARIADB_ROOT_HOST: "%"
+      MARIADB_DATABASE: ${DB_SCHEMA_NAME:?err}
+      MARIADB_INITDB_SKIP_TZINFO: true
+      MARIADB_MYSQL_LOCALHOST_USER: true
+    command: --log-bin=binlog --expire-logs-days=1 --binlog-format=ROW
+    tty: true
+    networks: 
+      - blp-dev
+
+volumes:
+  blp-mariadb-volume:
+    name: blp-mariadb-volume
+
+networks:
+  blp-dev:
+    name: blp-dev
+    driver: bridge
