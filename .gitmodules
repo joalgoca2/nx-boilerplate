@@ -1,0 +1,8 @@
+[submodule "nestjs-boilerplate"]
+	path = nestjs-boilerplate
+	url = git@github.com:joalgoca2/nestjs-boilerplate.git
+	branch = main
+[submodule "nebular-boilerplate"]
+	path = nebular-boilerplate
+	url = git@github.com:joalgoca2/nebular-boilerplate.git
+	branch = main
